@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Remake Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.container { width: 80%; margin: auto; font-family: sans-serif; }
+.controls { margin-bottom: 20px; display: flex; gap: 10px; }
+.btn { padding: 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Remake Dashboard</h1>
+
+<div class="controls">
+<!-- Search Bar -->
+<form action="/doctors/" method="GET">
+<input type="text" name="q" placeholder="Search Doctors...">
+<button type="submit" class="btn">Search</button>
+</form>
+
+<!-- Department Filter Buttons -->
+{% for dept in departments %}
+<a href="?department={{ dept }}" class="btn">{{ dept }}</a>
+{% endfor %}
+
+<!-- Refresh Button (Placeholder for your SQL logic later) -->
+<button class="btn" style="background-color: #e0e0e0;">Refresh from Server</button>
+</div>
+
+<!-- Line Chart -->
+<canvas id="remakeChart" width="400" height="150"></canvas>
+</div>
+
+<script>
+const ctx = document.getElementById('remakeChart').getContext('2d');
+new Chart(ctx, {
+type: 'line',
+data: {
+labels: {{ labels|safe }},
+datasets: [{
+label: 'Remakes Over 12 Months',
+data: {{ data|safe }},
+borderColor: 'rgb(75, 192, 192)',
+tension: 0.1
+}]
+}
+});
+</script>
+</body>
+</html>
