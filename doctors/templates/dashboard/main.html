@@ -1,53 +1,235 @@
-
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Remake Tracker</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>NDX | Retention Analytics</title>
+    <link rel="stylesheet" href="{% static 'doctors/css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 <style>
-.container { width: 80%; margin: auto; font-family: sans-serif; }
-.controls { margin-bottom: 20px; display: flex; gap: 10px; }
-.btn { padding: 10px; cursor: pointer; }
+
+
+
+:root {
+    --ndx-navy: #022b54;
+    --ndx-light-blue: #f0f4f8;
+    --critical: #e74c3c;
+    --high: #f39c12;
+    --medium: #3498db;
+}
+
+body { font-family: 'Segoe UI', sans-serif; background-color: var(--ndx-light-blue); margin: 0; padding-bottom: 50px; }
+
+.logo-container { background: var(--ndx-navy); padding: 15px 50px; border-bottom-right-radius: 100px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.logo-container img { height: 50px; }
+
+.container { 
+    width: 95%; 
+    max-width: 1200px; 
+    margin: 20px auto; 
+    overflow: hidden; /* Prevents children from spilling out */
+}
+
+.card { background: rgb(192, 203, 213); padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(25, 0, 124, 0.05); margin-bottom: 20px; border-top: 4px solid var(--ndx-navy); }
+
+.card { 
+    overflow-x: auto; /* Adds a scrollbar to the table card if needed */
+}
+
+table {
+    width: 100%;
+    min-width: 600px; /* Ensures the table stays readable */
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid { 
+    display: flex; 
+    flex-direction: row; 
+    flex-wrap: wrap;
+    gap: 20px; 
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chart-card { 
+    flex: 2; 
+    min-width: 300px; 
+    height: 400px; 
+}
+
+/* Risk Cards */
+.risk-card { background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 6px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.risk-Critical { border-left-color: var(--critical); }
+.risk-High { border-left-color: var(--high); }
+.risk-Medium { border-left-color: var(--medium); }
+.risk-sidebar { 
+    flex: 1; 
+    min-width: 250px; 
+}
+
+/* Ensure images and tables stay inside their cards */
+img, table { 
+    max-width: 100%; 
+}
+
+
+.risk-badge { font-size: 10px; font-weight: bold; color: white; padding: 3px 7px; border-radius: 3px; text-transform: uppercase; }
+.badge-Critical { background: var(--critical); }
+.badge-High { background: var(--high); }
+
+/* Buttons & Inputs */
+.filter-btn { text-decoration: none; color: var(--ndx-navy); font-weight: bold; margin-right: 15px; font-size: 13px; }
+.btn { background: var(--ndx-navy); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+
+/* Table Styling */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px; border-bottom: 2px solid var(--ndx-navy); color: var(--ndx-navy); }
+td { padding: 12px; border-bottom: 1px solid #eee; }
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.filter-btn {
+    background-color: #e0e6ed;
+    color: #022b54;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.filter-btn:hover {
+    background-color: #022b54;
+    color: white;
+}
+
 </style>
+
+
+
+
+
+
 </head>
 <body>
-<div class="container">
-<h1>Remake Dashboard</h1>
 
-<div class="controls">
-<!-- Search Bar -->
-<form action="/doctors/" method="GET">
-<input type="text" name="q" placeholder="Search Doctors...">
-<button type="submit" class="btn">Search</button>
-</form>
+    <div class="logo-container">
+        <img src="{% static 'doctors/images/ndx-logo.png' %}" alt="NDX Logo">
+    </div>
 
-<!-- Department Filter Buttons -->
-{% for dept in departments %}
-<a href="?department={{ dept }}" class="btn">{{ dept }}</a>
-{% endfor %}
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>NDX Dashboard</h1>
+            
+            <form action="." method="GET" class="search-box">
+                <input type="text" name="q" placeholder="Search Doctor..." value="{{ current_search }}">
+                <button type="submit" class="btn">Search</button>
+            </form>
+        </header>
 
-<!-- Refresh Button (Placeholder for your SQL logic later) -->
-<button class="btn" style="background-color: #e0e0e0;">Refresh from Server</button>
-</div>
+        <div class="filter-row">
+            <span>Filter by Dept:</span>
+            <a href="/" class="filter-btn">ALL</a>
+            {% for dept in departments %}
+                <a href="?department={{ dept }}" class="filter-btn">{{ dept }}</a>
+            {% endfor %}
+        </div>
 
-<!-- Line Chart -->
-<canvas id="remakeChart" width="400" height="150"></canvas>
-</div>
+        <div class="dashboard-grid">
+            
+            <div class="card chart-card" style="height: 450px; display: flex; flex-direction: column;">
+                <h3>12-Month Remake Trend</h3>
+                <div style="flex-grow: 1; min-height: 0; position: relative;">
+                    <canvas id="remakeChart"></canvas>
+                </div>
+            </div>
 
-<script>
-const ctx = document.getElementById('remakeChart').getContext('2d');
-new Chart(ctx, {
-type: 'line',
-data: {
-labels: {{ labels|safe }},
-datasets: [{
-label: 'Remakes Over 12 Months',
-data: {{ data|safe }},
-borderColor: 'rgb(75, 192, 192)',
-tension: 0.1
-}]
-}
-});
+            <div class="risk-sidebar">
+                <h3>High Risk Doctors</h3>
+                {% for action in action_plan %}
+                <div class="risk-card risk-{{ action.risk_level }}">
+                    <span class="risk-badge badge-{{ action.risk_level }}">{{ action.risk_level }} RISK</span>
+                    <h4>{{ action.name }}</h4>
+                    <p>Issues: {{ action.remakes }} in {{ action.department }}</p>
+                </div>
+                {% empty %}
+                <p>All doctors within safe threshold.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Detailed Remake Log</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Dept</th>
+                        <th>Reason</th>
+                        <th>Units</th>
+                        <th>Month</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for remake in remakes_list %}
+                    <tr>
+                        <td><strong>{{ remake.doctor_name }}</strong></td>
+                        <td>{{ remake.department }}</td>
+                        <td>{{ remake.remake_reason }}</td>
+                        <td>{{ remake.units }}</td>
+                        <td>{{ remake.month }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    const ctx = document.getElementById('remakeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Monthly Remakes',
+                data: {{ data|safe }},
+                borderColor: '#022b54',
+                backgroundColor: 'rgba(0, 64, 128, 0.05)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#022b54'
+            }]
+        }, 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    suggestedMax: 10, 
+                    ticks: {
+                        stepSize: 1 
+                    }
+                }
+            }
+        }
+    });
 </script>
 </body>
 </html>

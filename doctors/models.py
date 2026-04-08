@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Remake(models.Model):
@@ -33,7 +34,7 @@ class Remake(models.Model):
     lab_discount_units = models.IntegerField(default=0)
 
     # Internal tracking for the 12-month window
-    date_entered = models.DateTimeField(auto_now_add=True)
+    date_entered = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.case_number} - {self.doctor_name}"

@@ -117,9 +117,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+# core/settings.py
+
+# Switch this to 'SQL' when you connect to the server
+DATA_SOURCE = 'EXCEL' 
+
+# Path to your work desktop file
+EXCEL_FILE_PATH = "C:/Users/YourName/Desktop/DrData.xlsx"
