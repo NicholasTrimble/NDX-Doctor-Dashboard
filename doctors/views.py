@@ -8,8 +8,13 @@ def main_dashboard(request):
     query = request.GET.get('q')
     dept_filter = request.GET.get('department')
 
-    one_year_ago = datetime.now() - timedelta(days=365)
-    remakes = Remake.objects.filter(date_entered__gte=one_year_ago)
+    today = datetime.now()
+    # Lock to the 1st of the current month to exclude the incomplete current month
+    first_of_this_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    # Step back exactly 12 months
+    twelve_months_ago = (first_of_this_month - timedelta(days=365)).replace(day=1)
+
+    remakes = Remake.objects.filter(date_entered__gte=twelve_months_ago, date_entered__lt=first_of_this_month)
 
     if query:
         search_terms = query.replace('.', '').split()
