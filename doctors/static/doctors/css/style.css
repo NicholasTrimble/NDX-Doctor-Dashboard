@@ -103,3 +103,8 @@ td { padding: 12px; border-bottom: 1px solid #eee; }
     background-color: #022b54;
     color: white;
 }
+
+.filter-btn.active {
+    background-color: var(--ndx-navy);
+    color: white;
+}

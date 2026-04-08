@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Count
 from .models import Remake
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -25,12 +26,56 @@ def main_dashboard(request):
         month_label = r.date_entered.strftime("%b %Y")
         monthly_data[month_label] += 1
 
+    # Fetch timeframe from dropdown
+    try:
+        risk_timeframe = int(request.GET.get('risk_timeframe', 6))
+    except ValueError:
+        risk_timeframe = 6
+
+    risk_date_limit = datetime.now() - timedelta(days=30 * risk_timeframe)
+    top_doctors = (
+        remakes.filter(date_entered__gte=risk_date_limit)
+        .values('doctor_name')
+        .annotate(total=Count('id'))
+        .order_by('-total')[:3] # Grabs the top 3 highest remake doctors in the selected timeframe
+    )
+
+    action_plan = []
+    for item in top_doctors:
+        doc_name = item['doctor_name']
+        total_remakes = item['total']
+
+        # Find the dept causing the issues
+        top_dept = (
+            remakes.filter(date_entered__gte=risk_date_limit, doctor_name=doc_name)
+            .values('department')
+            .annotate(dept_count=Count('id'))
+            .order_by('-dept_count')
+            .first()
+        )
+        dept_name = top_dept['department'] if top_dept else "Unknown"
+
+        risk = "Medium"
+        if total_remakes > 10:
+            risk = "Critical"
+        elif total_remakes > 5:
+            risk = "High"
+            
+        action_plan.append({
+            'name': doc_name,
+            'remakes': total_remakes,
+            'department': dept_name,
+            'risk_level': risk,
+        })
+
     context = {
         'labels': list(monthly_data.keys()),
         'data': list(monthly_data.values()),
         'departments': Remake.objects.values_list('department', flat=True).distinct().order_by('department'),
         'current_search': query or "",
         'remakes_list': remakes.order_by('-date_entered')[:10],
+        'action_plan': action_plan,
+        'risk_timeframe': risk_timeframe,
     }
     return render(request, 'dashboard/main.html', context)
 
