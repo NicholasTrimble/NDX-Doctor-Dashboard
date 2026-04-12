@@ -108,3 +108,6 @@ td { padding: 12px; border-bottom: 1px solid #eee; }
     background-color: var(--ndx-navy);
     color: white;
 }
+
+.badge-Medium { background: var(--medium); }
+.risk-Medium { border-left-color: var(--medium); }

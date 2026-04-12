@@ -163,10 +163,10 @@
         data: {
             labels: {{ labels|safe }},
             datasets: [{
-                label: 'Monthly Remakes',
+                label: 'Remake Rate (%)',
                 data: {{ data|safe }},
                 borderColor: '#022b54',
-                backgroundColor: 'rgba(0, 64, 128, 0.05)',
+                backgroundColor: 'rgba(2, 43, 84, 0.1)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 5,
@@ -179,9 +179,20 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    suggestedMax: 10,
                     ticks: {
-                        stepSize: 1
+                        // This adds the % sign to the Y-Axis
+                        callback: function(value) {
+                            return value + "%";
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y + '%';
+                        }
                     }
                 }
             }
