@@ -45,7 +45,8 @@
         }
 
         .chart-card { flex: 2; min-width: 300px; height: 450px; }
-        .risk-sidebar { flex: 1; min-width: 250px; }
+        .risk-sidebar { flex: 1; min-width: 250px; max-height: 520px; }
+        .risk-scroll { max-height: 420px; overflow-y: auto; padding-right: 6px; }
 
         /* Risk Card Colors - Note the lowercase 'risk-high' to match your View logic */
         .risk-card { background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 6px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -111,18 +112,22 @@
             </form>
         </header>
 
-        <div class="filter-row">
+        <div class="filter-row" style="align-items: center;">
             <span>Filter by Dept:</span>
-            <a href="/" class="filter-btn {% if not request.GET.department %}active{% endif %}">ALL</a>
+            <a href="?{% if current_search %}q={{ current_search|urlencode }}&{% endif %}risk_timeframe={{ risk_timeframe }}" class="filter-btn {% if not request.GET.department %}active{% endif %}">ALL</a>
             {% for dept in departments %}
-                <a href="?department={{ dept }}" class="filter-btn {% if request.GET.department == dept %}active{% endif %}">{{ dept }}</a>
+                <a href="?{% if current_search %}q={{ current_search|urlencode }}&{% endif %}risk_timeframe={{ risk_timeframe }}&department={{ dept|urlencode }}" class="filter-btn {% if request.GET.department == dept %}active{% endif %}">{{ dept }}</a>
             {% endfor %}
+            <a href="?risk_timeframe={{ risk_timeframe }}" class="btn" style="font-size: 12px; padding: 6px 12px; margin-left: auto;">Back To Overall Remake Trend</a>
         </div>
 
         <div class="dashboard-grid">
             
             <div class="card chart-card" style="height: 450px; display: flex; flex-direction: column;">
                 <h3>12-Month Remake Trend</h3>
+                {% if current_search %}
+                <p style="margin: 4px 0 12px; color: #022b54; font-weight: 600;">Doctor: {{ current_search }}</p>
+                {% endif %}
                 <div style="flex-grow: 1; min-height: 0; position: relative;">
                     <canvas id="remakeChart"></canvas>
                 </div>
@@ -143,17 +148,19 @@
                     </select>
                 </form>
             </div>
+                <div class="risk-scroll">
                 {% for action in action_plan %}
-                <div class="risk-card risk-{{ action.risk_level }}">
-                    <span class="risk-badge badge-{{ action.risk_level }}">{{ action.risk_level }} RISK</span>
-                <a href="?q={{ action.name }}&risk_timeframe={{ risk_timeframe }}" style="text-decoration: none; color: inherit;">
-                    <h4>{{ action.name }}</h4>
-                </a>
-                    <p>Issues: {{ action.remakes }} in {{ action.department }}</p>
-                </div>
+                    <div class="risk-card risk-{{ action.risk_level }}">
+                        <span class="risk-badge badge-{{ action.risk_level }}">{{ action.risk_level }} RISK</span>
+                        <a href="?q={{ action.name }}&risk_timeframe={{ risk_timeframe }}" style="text-decoration: none; color: inherit;">
+                            <h4>{{ action.name }}</h4>
+                        </a>
+                        <p>Issues: {{ action.remakes }} in {{ action.department }}</p>
+                    </div>
                 {% empty %}
-                <p>All doctors within safe threshold.</p>
+                    <p>Within safe threshold.</p>
                 {% endfor %}
+                </div>
             </div>
         </div>
 

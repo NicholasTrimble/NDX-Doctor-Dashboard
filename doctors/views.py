@@ -41,10 +41,9 @@ def main_dashboard(request):
             rate = (stats['remake_total'] / stats['total_units']) * 100
             percentages.append(round(rate, 2))
         else:
-            # If units are empty in Excel, we show 0%
             percentages.append(0)
 
-    # --- MATH FOR RISK SIDEBAR (PERCENTAGE) ---
+    # --- MATH FOR RISK SIDEBAR ---
     try:
         risk_timeframe = int(request.GET.get('risk_timeframe', 6))
     except ValueError:
@@ -87,12 +86,13 @@ def main_dashboard(request):
                 })
 
     # Sort sidebar by highest remake rate first
-    action_plan = sorted(action_plan, key=lambda x: x['raw_rate'], reverse=True)[:3]
+    action_plan = sorted(action_plan, key=lambda x: x['raw_rate'], reverse=True)
 
     # Detailed remake log - filtered by risk timeframe and sorted by quantity (remake + adjustment units)
     remakes_data = list(remakes.filter(date_entered__gte=risk_date_limit))
     for r in remakes_data:
         r.issue_units = (r.remake_units or 0) + (r.adjustment_units or 0)
+    remakes_data = [r for r in remakes_data if r.issue_units > 0]
     remakes_data.sort(key=lambda x: x.issue_units, reverse=True)
     remakes_list = remakes_data[:10]
 
@@ -128,7 +128,7 @@ def doctor_suggestions(request):
     
     # Filter doctors that contain ALL search terms (case-insensitive)
     for term in search_terms:
-        if len(term) > 0:  # Skip empty terms
+        if len(term) > 0: 
             doctors_qs = doctors_qs.filter(doctor_name__icontains=term)
     
     # Get up to 10 matching doctors
