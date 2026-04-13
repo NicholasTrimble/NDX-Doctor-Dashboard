@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.db.models import Count, Sum
 from .models import Remake
 from datetime import datetime, timedelta
@@ -88,12 +89,19 @@ def main_dashboard(request):
     # Sort sidebar by highest remake rate first
     action_plan = sorted(action_plan, key=lambda x: x['raw_rate'], reverse=True)[:3]
 
+    # Detailed remake log - filtered by risk timeframe and sorted by quantity (remake + adjustment units)
+    remakes_data = list(remakes.filter(date_entered__gte=risk_date_limit))
+    for r in remakes_data:
+        r.issue_units = (r.remake_units or 0) + (r.adjustment_units or 0)
+    remakes_data.sort(key=lambda x: x.issue_units, reverse=True)
+    remakes_list = remakes_data[:10]
+
     context = {
         'labels': labels,
         'data': percentages,
         'departments': Remake.objects.values_list('department', flat=True).distinct().order_by('department'),
         'current_search': query or "",
-        'remakes_list': remakes.order_by('-date_entered')[:10],
+        'remakes_list': remakes_list,
         'action_plan': action_plan,
         'risk_timeframe': risk_timeframe,
     }
@@ -101,3 +109,29 @@ def main_dashboard(request):
 
 def doctor_search(request):
     return render(request, 'dashboard/search.html')
+
+def doctor_suggestions(request):
+    query = request.GET.get('q', '').strip()
+    
+    if len(query) < 1:
+        return JsonResponse({'suggestions': []})
+    
+    # Remove periods from query and split into words
+    query_normalized = query.replace('.', '').strip()
+    search_terms = query_normalized.split()
+    
+    if not search_terms:
+        return JsonResponse({'suggestions': []})
+    
+    # Start with all doctors
+    doctors_qs = Remake.objects.values_list('doctor_name', flat=True).distinct()
+    
+    # Filter doctors that contain ALL search terms (case-insensitive)
+    for term in search_terms:
+        if len(term) > 0:  # Skip empty terms
+            doctors_qs = doctors_qs.filter(doctor_name__icontains=term)
+    
+    # Get up to 10 matching doctors
+    doctors = doctors_qs.order_by('doctor_name')[:10]
+    
+    return JsonResponse({'suggestions': list(doctors)})

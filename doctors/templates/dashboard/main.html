@@ -63,6 +63,33 @@
         .filter-btn:hover { background-color: var(--ndx-navy); color: white; }
         .btn { background: var(--ndx-navy); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
 
+        /* Search Box Dropdown */
+        .search-box { position: relative; display: flex; gap: 8px; }
+        #searchInput { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .doctor-dropdown { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            width: 100%; 
+            background: white; 
+            border: 1px solid #ccc; 
+            border-top: none;
+            border-radius: 0 0 4px 4px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            display: none; 
+            z-index: 100; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .doctor-dropdown.show { display: block; }
+        .doctor-option { 
+            padding: 10px 12px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #eee; 
+        }
+        .doctor-option:hover { background-color: var(--ndx-light-blue); }
+        .doctor-option:last-child { border-bottom: none; }
+
         /* Table Styling */
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { text-align: left; padding: 12px; border-bottom: 2px solid var(--ndx-navy); color: var(--ndx-navy); }
@@ -77,9 +104,10 @@
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <h1>NDX Dashboard</h1>
             
-            <form action="." method="GET" class="search-box">
-                <input type="text" name="q" placeholder="Search Doctor..." value="{{ current_search }}">
+            <form action="." method="GET" id="searchForm" class="search-box" style="position: relative;">
+                <input type="text" id="searchInput" name="q" placeholder="Search Doctor..." value="{{ current_search }}" style="flex: 1;">
                 <button type="submit" class="btn">Search</button>
+                <div id="doctorDropdown" class="doctor-dropdown"></div>
             </form>
         </header>
 
@@ -137,8 +165,7 @@
                         <th>Doctor</th>
                         <th>Dept</th>
                         <th>Reason</th>
-                        <th>Units</th>
-                        <th>Month</th>
+                        <th>Issue Units</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -147,8 +174,7 @@
                         <td><strong>{{ remake.doctor_name }}</strong></td>
                         <td>{{ remake.department }}</td>
                         <td>{{ remake.remake_reason }}</td>
-                        <td>{{ remake.units }}</td>
-                        <td>{{ remake.month }}</td>
+                        <td>{{ remake.issue_units }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -196,6 +222,56 @@
                     }
                 }
             }
+        }
+    });
+
+    // Doctor autocomplete dropdown
+    const searchInput = document.getElementById('searchInput');
+    const dropdown = document.getElementById('doctorDropdown');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length < 1) {
+            dropdown.classList.remove('show');
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/doctor-suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    
+                    if (data.suggestions.length === 0) {
+                        dropdown.classList.remove('show');
+                        return;
+                    }
+
+                    data.suggestions.forEach(doctor => {
+                        const option = document.createElement('div');
+                        option.className = 'doctor-option';
+                        option.textContent = doctor;
+                        option.addEventListener('click', () => {
+                            searchInput.value = doctor;
+                            dropdown.classList.remove('show');
+                            // Optional: auto-submit the form
+                            // document.getElementById('searchForm').submit();
+                        });
+                        dropdown.appendChild(option);
+                    });
+
+                    dropdown.classList.add('show');
+                });
+        }, 300);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (e.target !== searchInput && e.target !== dropdown) {
+            dropdown.classList.remove('show');
         }
     });
     </script>
