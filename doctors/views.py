@@ -5,6 +5,28 @@ from .models import Remake
 from datetime import datetime, timedelta
 from collections import defaultdict
 
+def categorize_error_type(remake_reason):
+    """Categorize remake reason as Dr Error, Lab Error, or Other"""
+    if not remake_reason:
+        return "Other"
+    
+    reason_lower = remake_reason.lower()
+    
+    # Doctor error keywords
+    dr_error_keywords = ['doctor', 'implant doctor', 'fit doctor', 'margin doctor', 'shade doctor', 'bite doctor']
+    # Lab error keywords  
+    lab_error_keywords = ['lab', 'contour', 'broke', 'fracture', 'fit to crown', 'contact']
+    
+    for keyword in dr_error_keywords:
+        if keyword in reason_lower:
+            return "Dr Error"
+    
+    for keyword in lab_error_keywords:
+        if keyword in reason_lower:
+            return "Lab Error"
+    
+    return "Other"
+
 def main_dashboard(request):
     query = request.GET.get('q')
     dept_filter = request.GET.get('department')
@@ -96,6 +118,12 @@ def main_dashboard(request):
     remakes_data.sort(key=lambda x: x.issue_units, reverse=True)
     remakes_list = remakes_data[:10]
 
+    # Error type breakdown for current filtered data
+    error_breakdown = defaultdict(int)
+    for r in remakes_data:
+        error_type = categorize_error_type(r.remake_reason)
+        error_breakdown[error_type] += 1
+
     context = {
         'labels': labels,
         'data': percentages,
@@ -104,6 +132,7 @@ def main_dashboard(request):
         'remakes_list': remakes_list,
         'action_plan': action_plan,
         'risk_timeframe': risk_timeframe,
+        'error_breakdown': dict(error_breakdown),
     }
     return render(request, 'dashboard/main.html', context)
 
