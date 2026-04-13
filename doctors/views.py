@@ -122,7 +122,7 @@ def main_dashboard(request):
     error_breakdown = defaultdict(int)
     for r in remakes_data:
         error_type = categorize_error_type(r.remake_reason)
-        error_breakdown[error_type] += 1
+        error_breakdown[error_type] += r.issue_units
 
     context = {
         'labels': labels,
