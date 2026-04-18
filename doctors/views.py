@@ -104,7 +104,7 @@ def main_dashboard(request):
                     'remakes': f"{round(rate, 1)}%",
                     'department': item['department'],
                     'risk_level': risk_level,
-                    'raw_rate': rate # used for sorting
+                    'raw_rate': rate 
                 })
 
     # Sort sidebar by highest remake rate first
