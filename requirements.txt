@@ -2,3 +2,7 @@ django>=6.0.3,<6.1
 python-dotenv
 django-crispy-forms
 crispy-bootstrap5
+pandas
+openpyxl
+numpy
+matplotlib
