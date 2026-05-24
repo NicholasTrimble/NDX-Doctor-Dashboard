@@ -6,10 +6,37 @@
 
 NDX Doctor Dashboard
 
+Internal analytics dashboard used to track dental remake trends and production quality metrics across a 12-month rolling dataset.
+
 Overview
 
-NDX Doctor Dashboard is an internal reporting tool built to analyze dental remake trends across large production datasets.
+This tool replaces manual Excel review by providing a centralized dashboard for analyzing remake rates across doctors, departments, and production labs.
 
-The project was created to reduce the need for manually sorting through Excel spreadsheets and Power BI exports during operational review meetings. Instead of reviewing raw spreadsheet data, management can use the dashboard to identify remake trends, high-risk doctors, department-level issues, and recurring production problems through a centralized interface.
+It processes 200k+ production records imported from structured Excel datasets.
 
-The application currently processes over 200,000 production records imported from monthly Excel reports.
+Key Features
+
+- 12-month rolling remake trend analysis
+- Doctor and department-level performance tracking
+- Risk flagging for high-remake contributors
+- Filtering by 3, 6, or 12-month timeframes
+- Search-based doctor lookup with live filtering
+
+Data Model
+
+Tracks production-level fields including:
+- Case metadata (month, case number, doctor, department)
+- Production details (lab, method, scanner, model type)
+- Remake classification (doctor vs lab fault)
+- Unit-level remake and adjustment counts
+
+Tech Stack
+
+- Django
+- Python
+- SQLite
+- JavaScript (client-side filtering)
+
+Notes
+
+Designed as an internal operations tool for replacing manual Excel-based reporting workflows.
