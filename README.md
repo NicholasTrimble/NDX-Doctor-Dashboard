@@ -35,7 +35,7 @@ Tech Stack
 - Django
 - Python
 - SQLite
-- JavaScript (client-side filtering)
+- JavaScript
 
 Notes
 
