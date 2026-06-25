@@ -250,7 +250,11 @@ def main_dashboard(request):
                     'remakes': f"{round(doctor_remake_percentage, 1)}%",
                     'department': department_name,
                     'risk_level': risk_level,
+<<<<<<< HEAD
+                    'raw_rate': rate 
+=======
                     'raw_rate': doctor_remake_percentage  # Used for sorting
+>>>>>>> f3149528d2086d3889582971f30e94e4325e726c
                 })
     
     # Sort action plan by highest remake rate first (most problematic first)
