@@ -100,6 +100,19 @@
 <body>
     <div class="logo-container">
         <img src="{% static 'doctors/images/ndx-logo.png' %}" alt="NDX Logo" onerror="this.style.display='none'">
+            
+        
+        <div class ="logout-container" style="position: absolute; top: 15px; right: 50px;">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Log Out</button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}">Log In</a>
+            {% endif %}
+        </div>
+        
     </div>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">

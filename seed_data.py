@@ -72,8 +72,7 @@ def seed_from_excel():
 
     print(f'Processing {len(df)} rows from DATA sheet...')
 
-    Remake.objects.all().delete()
-    print('Deleted existing Remake records.')
+    
 
     remakes_to_create = []
     successful_imports = 0

@@ -130,3 +130,8 @@ DATA_SOURCE = 'EXCEL'
 
 # Path to your work desktop file
 EXCEL_FILE_PATH = "C:/Users/YourName/Desktop/DrData.xlsx"
+
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
